@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+const vscode = acquireVsCodeApi();
 
 function clone() {
   

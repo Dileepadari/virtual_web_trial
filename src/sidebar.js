@@ -1,4 +1,4 @@
-import * as vscode from 'vscode';
+const vscode = acquireVsCodeApi();
 
 document.addEventListener('DOMContentLoaded', function () {
     const command1 =  document.getElementById('command1');
