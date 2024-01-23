@@ -1,6 +1,6 @@
-# Hello World Sample
+# Virtual lab extension Sample
 
-This is a Hello World Web Extension example that shows you how to write a extension that runs in VS Code Web (alone)
+This is a test repo for the web version of virtual lab extension
 
 Guide for this sample: https://code.visualstudio.com/api/extension-guides/web-extensions.
 
@@ -20,7 +20,5 @@ Guide for this sample: https://code.visualstudio.com/api/extension-guides/web-ex
 
 ## Running the Sample
 
-- Run `npm install` in terminal to install dependencies
-- Run the `Run Web Extension` target in the Debug View. This will:
-	- Start a task `npm: watch` to compile the code
-	- Run the extension in a new VS Code window that contains a web extension host
+- Run `npm install` in terminal to install dependencies		
+- Run `npm run dev` to run development mode		
