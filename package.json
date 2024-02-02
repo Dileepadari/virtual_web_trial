@@ -19,32 +19,32 @@
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
-			  {
-				"id": "vlabs-experiment-generator",
-				"title": "Experiment",
-				"icon": "images/icon.svg"
-			  }
-			]
-		  },
-		  "views": {
-			  "vlabs-experiment-generator": [
 				{
-				  "type": "webview",
-				  "id": "vlabs.experimentView",
-				  "name": "Authoring Environment"
+					"id": "vlabs-experiment-generator",
+					"title": "Experiment",
+					"icon": "images/icon.svg"
 				}
-			  ]
-			},
-			"commands": [
-			  {
+			]
+		},
+		"views": {
+			"vlabs-experiment-generator": [
+				{
+					"type": "webview",
+					"id": "vlabs.experimentView",
+					"name": "Authoring Environment"
+				}
+			]
+		},
+		"commands": [
+			{
 				"command": "virtual-labs-experiment-authoring-environment.virtualLabs",
 				"title": "Virtual Labs",
 				"icon": {
-				  "light": "images/icon.svg",
-				  "dark": "images/icon.svg"
+					"light": "images/icon.svg",
+					"dark": "images/icon.svg"
 				}
-			  }
-			]
+			}
+		]
 	},
 	"scripts": {
 		"dev": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=.",
@@ -71,5 +71,13 @@
 		"typescript": "^5.3.2",
 		"webpack": "^5.52.1",
 		"webpack-cli": "^4.8.0"
+	},
+	"dependencies": {
+		"axios": "^1.6.7",
+		"fs": "^0.0.1-security",
+		"jszip": "^3.10.1",
+		"shelljs": "^0.8.5",
+		"simple-git": "^3.22.0",
+		"unzipper": "^0.10.14"
 	}
 }

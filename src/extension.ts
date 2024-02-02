@@ -1,5 +1,25 @@
 import * as vscode from 'vscode';
 
+
+function cloneWebView(view: vscode.WebviewView, extensionUri: vscode.Uri) {
+	const panel = vscode.window.createWebviewPanel(
+		'virtualLabs', // Identifies the type of the webview. Used internally
+		'Virtual Labs Experiment Authoring Environment', // Title of the panel displayed to the user
+		vscode.ViewColumn.One, // Editor column to show the new webview panel in.
+		{
+			enableScripts: true
+		}
+	);
+	const scriptUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src', 'webview.js')
+	);
+	const styleUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
+	);
+    panel.webview.html = getWebviewContent(scriptUri, styleUri);
+}
+
+
 // Helper function to get webview content
 function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
 
@@ -44,29 +64,11 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
 			<button id="submit" class="bigButton">Submit</button>
 			
 			<script type="module" src="${scriptUri}"></script>
+			<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
 		</body>
 
 		</html>`;
 }
-
-function cloneWebView(view: vscode.WebviewView, extensionUri: vscode.Uri) {
-    const panel = vscode.window.createWebviewPanel(
-        'virtualLabs',
-        'Virtual Labs Experiment Authoring Environment',
-        vscode.ViewColumn.One,
-        { enableScripts: true }
-    );
-
-
-	const scriptUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src', 'webview.js')
-	);
-	const styleUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
-	);
-    panel.webview.html = getWebviewContent(scriptUri, styleUri);
-}
-
 
 
 function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri){
@@ -74,7 +76,7 @@ function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri){
 	<html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">	
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Virtual Labs Experiment Authoring Environment</title>
 		<link rel="stylesheet" href="${styleUri}">
 	</head>
@@ -111,7 +113,7 @@ function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri){
 export function activate(context: vscode.ExtensionContext) {
 	const extensionUri = context.extensionUri;
 	// success message of start of extension
-	console.log('Congratulations, virtuall labs extension is now active in the web extension host!');
+	console.log('Congratulations, virtuall labs extension is now active i	n the web extension host!');
 
 	vscode.window.registerWebviewViewProvider(
 		'vlabs.experimentView', // Identifies the type of the webview. Used internally
@@ -140,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
 							cloneWebView(view, extensionUri);
 							break;
 						}
-				vscode.window.showInformationMessage("UI rendered");
+				vscode.window.showInformationMessage("UI");
 				});
 			},
 	});
@@ -151,3 +153,8 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
 	// Noop
 }
+
+module.exports = {
+	activate,
+	deactivate,
+};

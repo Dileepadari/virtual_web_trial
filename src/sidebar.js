@@ -9,8 +9,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const command6 = document.getElementById('command6');
     const command7 = document.getElementById('command7');
     const command8 = document.getElementById('command8');
-    
-    command1.addEventListener('click', () => {
+
+command1.addEventListener('click', () => {
         vscode.postMessage({
             command: 'command1'
         });
