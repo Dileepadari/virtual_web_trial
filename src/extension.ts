@@ -1,26 +1,46 @@
 import * as vscode from 'vscode';
 
-
-function cloneWebView(view: vscode.WebviewView, extensionUri: vscode.Uri) {
-	const panel = vscode.window.createWebviewPanel(
-		'virtualLabs', // Identifies the type of the webview. Used internally
-		'Virtual Labs Experiment Authoring Environment', // Title of the panel displayed to the user
-		vscode.ViewColumn.One, // Editor column to show the new webview panel in.
-		{
-			enableScripts: true
-		}
-	);
-	const scriptUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src', 'webview.js')
-	);
-	const styleUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
-	);
-    panel.webview.html = getWebviewContent(scriptUri, styleUri);
+// Helper function to get webview(panel) content (html and scripts)
+function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
+	return `	<!DOCTYPE html>
+		<html lang="en">
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Virtual Labs Experiment Authoring Environment</title>
+			<link rel="stylesheet" href="${styleUri}">
+		</head>
+		<body>
+		<div class="command1">
+		<button class="sideButton" id="command1">Initialize Experiment</button>
+		</div>
+		<div class="command2">
+			<button class="sideButton" id="command2">Validate</button>
+		</div>
+		<div class="command3">
+			<button class="sideButton" id="command3">Build Local</button>
+		</div>
+		<div class="command4">
+			<button class="sideButton" id="command4">Deploy Local</button>
+		</div>
+		<div class="command5">
+			<button class="sideButton" id="command5">Clean</button>
+		</div>
+		<div class="command6">
+			<button class="sideButton" id="command6">Deploy for Testing</button>
+		</div>
+		<div class="command7">
+			<button class="sideButton" id="command7">Submit for Review</button>
+		</div>
+		<div class="command8">
+			<button class="sideButton" id="command8">Help</button>
+		</div>
+		</body>
+		<script src="${scriptUri}"></script>
+		</html>
+		`;
 }
 
-
-// Helper function to get webview content
 function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
 
 	// const config = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
@@ -63,96 +83,246 @@ function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
 			</div>
 			<button id="submit" class="bigButton">Submit</button>
 			
-			<script type="module" src="${scriptUri}"></script>
-			<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.2.2/jszip.min.js"></script>
+			<script  src="${scriptUri}"></script>
 		</body>
 
 		</html>`;
 }
 
+function getWebviewFormContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
 
-function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri){
-	return `<!DOCTYPE html>
-	<html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Virtual Labs Experiment Authoring Environment</title>
-		<link rel="stylesheet" href="${styleUri}">
-	</head>
-	<body>
-	<div class="command1">
-		<button class="sideButton" id="command1">Initialize Experiment</button>
-	</div>
-	<div class="command2">
-		<button class="sideButton" id="command2">Validate</button>
-	</div>
-	<div class="command3">
-		<button class="sideButton" id="command3">Build Local</button>
-	</div>
-	<div class="command4">
-		<button class="sideButton" id="command4">Deploy Local</button>
-	</div>
-	<div class="command5">
-		<button class="sideButton" id="command5">Clean</button>
-	</div>
-	<div class="command6">
-		<button class="sideButton" id="command6">Deploy for Testing</button>
-	</div>
-	<div class="command7">
-		<button class="sideButton" id="command7">Submit for Review</button>
-	</div>
-	<div class="command8">
-		<button class="sideButton" id="command8">Help</button>
-	</div>
-	</body>
-	<script type="module" src="${scriptUri}"></script>
-	</html>`;
+	return `
+	<!DOCTYPE html>
+		<html lang="en">
+
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Virtual Labs Experiment Authoring Environment</title>
+			<link rel="stylesheet" href="${styleUri}">
+		</head>
+
+		<body>
+			<h1>Virtual Labs Experiment Authoring Environment</h1>
+			<div class="Organization">
+				<label for="userName">Github User Name</label>
+				<input type="text" id="userName" name="userName">
+
+			</div>
+			<div class="Experiment">
+				<label for="personalAccessToken">Personal Access Token</label>
+				<input type="text" id="personalAccessToken" name="personalAccessToken">
+			</div>
+			<div class="Branch">
+				<label for="commitMessage">Commit Message</label>
+				<textarea id="commitMessage" name="commitMessage" ></textarea>
+			</div>
+			<button id="push" class="bigButton">Submit</button>
+
+			<script  src="${scriptUri}"></script>
+		</body>
+
+		</html>`;
 }
-// This method is called when your extension is activated
-export function activate(context: vscode.ExtensionContext) {
+
+function getPRContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
+	return `
+	<!DOCTYPE html>
+		<html lang="en">
+
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>Virtual Labs Experiment Authoring Environment</title>
+			<link rel="stylesheet" href="${styleUri}">
+		</head>
+
+		<body>
+			<h1>Virtual Labs Experiment Authoring Environment</h1>
+			<div class="Organization">
+				<label for="userName">Pull Request Title</label>
+				<input type="text" id="title" name="userName">
+
+			</div>
+			<div class="Experiment">
+				<label for="personalAccessToken">Personal Access Token</label>
+				<input type="text" id="personalAccessToken" name="personalAccessToken">
+			</div>
+			<div class="Branch">
+				<label for="commitMessage">Description</label>
+				<textarea id="description" name="commitMessage" ></textarea>
+			</div>
+			<button id="pr" class="bigButton">Submit</button>
+
+			<script  src="${scriptUri}"></script>
+		</body>
+
+		</html>`;
+}
+
+async function cloneWebView(view: vscode.WebviewView, extensionUri: vscode.Uri) {
+	const panel = vscode.window.createWebviewPanel(
+		'virtualLabs',
+		'Virtual Labs Experiment Authoring Environment',
+		vscode.ViewColumn.One,
+		{
+			enableScripts: true
+		}
+	);
+
+	const scriptUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src', 'webview.js')
+	);
+	const styleUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
+	);
+	panel.webview.html = getWebviewContent(scriptUri, styleUri);
+
+	panel.webview.onDidReceiveMessage(async (message) => {
+		switch (message.command) {
+			case 'clone':
+				{
+						const experimentName = message.experimentName;
+						const branch = message.branch;
+						const organization = message.organization;
+						const repoUrl = `https://vscode.dev/github/${organization}/${experimentName}/tree/${branch}`;
+
+						vscode.env.openExternal(vscode.Uri.parse(repoUrl));
+
+						vscode.window.showInformationMessage('Repository cloned successfully!');
+						panel.dispose();
+						break;
+				}
+			default:
+				break;
+			}
+	});
+}
+
+function buildScript(command: string) {
+	switch (command) {
+		case 'command2':
+			vscode.window.showInformationMessage('Validation UI testing');
+			break;
+		case 'command3':
+			vscode.window.showInformationMessage('Build local UI testing');
+			break;
+		case 'command4':
+			vscode.window.showInformationMessage('Deploy local UI testing');
+			break;
+		case 'command5':
+			vscode.window.showInformationMessage('Clean UI testing');
+			break;
+		default:
+			break;
+	}
+}
+
+async function pushAndMerge(view: vscode.WebviewView, extensionUri: vscode.Uri, context: vscode.ExtensionContext){
+	const panel = vscode.window.createWebviewPanel(
+		'vlabs.buildexp',
+		'User Details',
+		vscode.ViewColumn.One,
+		{
+			enableScripts: true
+		}
+	);
+	const scriptUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src', 'pr.js')
+	);
+	const styleUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
+	);
+
+	panel.webview.html = getWebviewFormContent(scriptUri, styleUri);
+	panel.webview.onDidReceiveMessage(async (message) => {
+		switch (message.command) {
+			case 'push':
+				vscode.window.showInformationMessage('push UI testing');
+				break;
+		}
+	}, undefined, context.subscriptions);
+}
+
+function raisePR(view: vscode.WebviewView, extensionUri: vscode.Uri, context: vscode.ExtensionContext){
+	const panel = vscode.window.createWebviewPanel(
+		'vlabs.buildexp',
+		'User Details',
+		vscode.ViewColumn.One,
+		{
+			enableScripts: true
+		}
+	);
+	const scriptUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src', 'pr.js')
+	);
+	const styleUri = view.webview.asWebviewUri(
+		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
+	);
+
+	panel.webview.html = getPRContent(scriptUri, styleUri);
+	panel.webview.onDidReceiveMessage(async (message) => {
+		switch (message.command) {
+			case 'pr':
+				vscode.window.showInformationMessage('Pull request UI testing');
+				break;
+		}
+	}, undefined, context.subscriptions);
+
+}
+
+
+function activate(context: vscode.ExtensionContext){
 	const extensionUri = context.extensionUri;
-	// success message of start of extension
-	console.log('Congratulations, virtuall labs extension is now active i	n the web extension host!');
-
 	vscode.window.registerWebviewViewProvider(
-		'vlabs.experimentView', // Identifies the type of the webview. Used internally
-
+		'vlabs.experimentView',
 		{
 			resolveWebviewView: (view) => {
 				view.webview.options = {
 					enableScripts: true,
 				};
 				const scriptUri = view.webview.asWebviewUri(
-					vscode.Uri.joinPath(extensionUri,'src', 'sidebar.js')
+					vscode.Uri.joinPath(extensionUri, 'src', 'sidebar.js')
 				);
 				const styleUri = view.webview.asWebviewUri(
 					vscode.Uri.joinPath(extensionUri, 'src', 'sidebar.css')
 				);
 				view.webview.html = getPanel1Content(scriptUri, styleUri);
 				view.webview.onDidReceiveMessage(async (message) => {
-					vscode.window.showInformationMessage(message);
+
+				// close webview panel after selection of a command
 					switch (message.command) {
 						case 'command1':
-							// check if a directory is open in vscode
-							if (!vscode.workspace.workspaceFolders || vscode.workspace.workspaceFolders.length === 0) {
+							if (vscode.workspace.workspaceFolders === null){
 								vscode.window.showErrorMessage("Please open a directory in vscode");
 								break;
 							}
 							cloneWebView(view, extensionUri);
 							break;
-						}
-				vscode.window.showInformationMessage("UI");
-				});
-			},
-	});
-
+						case 'command6':
+							await pushAndMerge(view, extensionUri, context);
+							break;
+						case 'command7':
+							raisePR(view, extensionUri, context);
+							break;
+						case 'command8':
+							{
+								const path = 	vscode.Uri.joinPath(extensionUri, 'src', 'READE.md');
+								vscode.commands.executeCommand('markdown.showPreview', path);
+								break;
+							}
+						default:
+							buildScript(message.command);
+							break;
+					}
+			});
+		}}
+	);
 }
 
-// This method is called when your extension is deactivated
-export function deactivate() {
-	// Noop
-}
+
+
+function deactivate() {}
 
 module.exports = {
 	activate,

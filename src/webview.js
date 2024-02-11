@@ -1,3 +1,5 @@
+// import { acquireVsCodeApi } from 'vscode';
+// import { document } from 'vscode';
 const vscode = acquireVsCodeApi();
 
 function clone() {
@@ -13,26 +15,26 @@ function clone() {
   });
 }
 
-function addBranch(){
+// function addBranch(){
   
-  vscode.postMessage({
-    command: 'addBranch'
-  });
-}	
-function addOrganization(){
+//   vscode.postMessage({
+//     command: 'addBranch'
+//   });
+// }	
+// function addOrganization(){
  
- vscode.postMessage({
-   command: 'addOrganization'
- });	
-}   
+//  vscode.postMessage({
+//    command: 'addOrganization'
+//  });	
+// }   
 
 
 const submitButton = document.getElementById('submit');
 submitButton.addEventListener('click', clone);
 
-const addBranchButton = document.getElementById('addBranch');
-addBranchButton.addEventListener('click', addBranch);
+// const addBranchButton = document.getElementById('addBranch');
+// addBranchButton.addEventListener('click', addBranch);
 
-const addOrganizationButton = document.getElementById('addOrganization');
-addOrganizationButton.addEventListener('click', addOrganization);
+// const addOrganizationButton = document.getElementById('addOrganization');
+// addOrganizationButton.addEventListener('click', addOrganization);
 

@@ -1,3 +1,5 @@
+// import { acquireVsCodeApi } from 'vscode';
+// import { document } from 'vscode';
 const vscode = acquireVsCodeApi();
 
 document.addEventListener('DOMContentLoaded', function () {
