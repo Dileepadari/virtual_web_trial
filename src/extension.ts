@@ -307,7 +307,7 @@ function activate(context: vscode.ExtensionContext){
 							break;
 						case 'command8':
 							{
-								const path = 	vscode.Uri.joinPath(extensionUri, 'src', 'READE.md');
+								const path = 	vscode.Uri.joinPath(extensionUri, 'src', 'README.md');
 								vscode.commands.executeCommand('markdown.showPreview', path);
 								break;
 							}
