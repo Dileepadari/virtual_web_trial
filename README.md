@@ -1,44 +1,70 @@
-# Virtual lab extension Sample
+# web-fs README
 
-This is a test repo for the web version of virtual lab extension
+This is the README for your extension "web-fs". After writing up a brief description, we recommend including the following sections.
 
-Guide for this sample: https://code.visualstudio.com/api/extension-guides/web-extensions.
+## Features
 
+Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
 
-## VS Code API
+For example if there is an image subfolder under your extension project workspace:
 
-### `vscode` module
+\!\[feature X\]\(images/feature-x.png\)
 
-- [`commands.registerCommand`](https://code.visualstudio.com/api/references/vscode-api#commands.registerCommand)
-- [`window.showInformationMessage`](https://code.visualstudio.com/api/references/vscode-api#window.showInformationMessage)
+> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
 
-### Contribution Points
+## Requirements
 
-- [`browser`](https://code.visualstudio.com/api/references/extension-manifest)
+If you have any requirements or dependencies, add a section describing those and how to install and configure them.
 
-- [`contributes.commands`](https://code.visualstudio.com/api/references/contribution-points#contributes.commands)
+## Extension Settings
 
-## Running the Sample
+Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
 
-- Run `npm install` in terminal to install dependencies		
-- Run `npm run dev` to run development mode		
+For example:
 
+This extension contributes the following settings:
 
-# why vscode web and codespaces?
-Codespaces
+* `myExtension.enable`: enable/disable this extension
+* `myExtension.thing`: set to `blah` to do something
 
-    Cloud-based development environment: Codespaces is a cloud-based development environment that allows you to code from anywhere, on any device. It's hosted on Microsoft's servers, so you don't need to worry about setting up and maintaining your own development environment.
-    Pre-configured with popular tools and languages: Codespaces comes pre-configured with a variety of popular tools and languages, so you can get started coding right away. This includes support for JavaScript, Python, Java, C++, and more.
-    Integrated with GitHub: Codespaces is integrated with GitHub, so you can easily create a new Codespace from a GitHub repository, and your changes will be automatically saved back to GitHub.
-    Collaboration features: Codespaces includes a number of collaboration features, such as real-time editing and commenting, so you can work on projects with others in real time.
+## Known Issues
 
-VSCode Web
+Calling out known issues can help limit users opening duplicate issues against your extension.
 
-    Web-based version of VSCode: VSCode Web is a web-based version of VSCode that you can use in your browser. It provides a similar experience to the desktop version of VSCode, but it doesn't require you to install anything on your computer.
-    Limited functionality: VSCode Web has some limitations compared to the desktop version of VSCode. For example, it doesn't support all of the same extensions, and it doesn't have the same level of performance.
-    Best for quick edits and small projects: VSCode Web is best suited for quick edits and small projects. If you're working on a larger project, or if you need to use more advanced features, you're better off using the desktop version of VSCode.
+## Release Notes
 
-Which one should you use?
+Users appreciate release notes as you update your extension.
 
-The best choice for you depends on your needs. If you need a cloud-based development environment with all the bells and whistles, Codespaces is the way to go. If you're just looking for a quick and easy way to edit some code, VSCode Web is a good option.
+### 1.0.0
 
+Initial release of ...
+
+### 1.0.1
+
+Fixed issue #.
+
+### 1.1.0
+
+Added features X, Y, and Z.
+
+-----------------------------------------------------------------------------------------------------------
+## Following extension guidelines
+
+Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+
+* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+
+## Working with Markdown
+
+**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
+
+* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
+* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
+* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
+
+### For more information
+
+* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
+* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+
+**Enjoy!**

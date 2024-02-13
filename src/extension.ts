@@ -1,330 +1,234 @@
-import * as vscode from 'vscode';
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as path from "path";
+import * as vscode from "vscode";
+import { MemFS } from "./memFSProvider";
+import { NativeFS } from "./nativeFSProvider";
+import { nativeFSPrefix } from "./nativeFSUtil";
 
-// Helper function to get webview(panel) content (html and scripts)
-function getPanel1Content(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
-	return `	<!DOCTYPE html>
-		<html lang="en">
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Virtual Labs Experiment Authoring Environment</title>
-			<link rel="stylesheet" href="${styleUri}">
-		</head>
-		<body>
-		<div class="command1">
-		<button class="sideButton" id="command1">Initialize Experiment</button>
-		</div>
-		<div class="command2">
-			<button class="sideButton" id="command2">Validate</button>
-		</div>
-		<div class="command3">
-			<button class="sideButton" id="command3">Build Local</button>
-		</div>
-		<div class="command4">
-			<button class="sideButton" id="command4">Deploy Local</button>
-		</div>
-		<div class="command5">
-			<button class="sideButton" id="command5">Clean</button>
-		</div>
-		<div class="command6">
-			<button class="sideButton" id="command6">Deploy for Testing</button>
-		</div>
-		<div class="command7">
-			<button class="sideButton" id="command7">Submit for Review</button>
-		</div>
-		<div class="command8">
-			<button class="sideButton" id="command8">Help</button>
-		</div>
-		</body>
-		<script src="${scriptUri}"></script>
-		</html>
-		`;
+// this method is called when your extension is activated
+// your extension is activated the very first time the command is executed
+export async function activate(context: vscode.ExtensionContext) {
+  // Register providers
+  // * NativeFS
+  const nativeFS = new NativeFS();
+  context.subscriptions.push(
+    vscode.workspace.registerFileSystemProvider(NativeFS.scheme, nativeFS, {
+      isCaseSensitive: true,
+      isReadonly: false,
+    })
+  );
+  context.subscriptions.push(
+    vscode.workspace.registerFileSearchProvider(NativeFS.scheme, nativeFS)
+  );
+  context.subscriptions.push(
+    vscode.workspace.registerTextSearchProvider(NativeFS.scheme, nativeFS)
+  );
+
+  // * MemFS
+  const memFS = new MemFS();
+  context.subscriptions.push(
+    vscode.workspace.registerFileSystemProvider(MemFS.scheme, memFS, {
+      isCaseSensitive: true,
+      isReadonly: false,
+    })
+  );
+  context.subscriptions.push(
+    vscode.workspace.registerFileSearchProvider(MemFS.scheme, memFS)
+  );
+  context.subscriptions.push(
+    vscode.workspace.registerTextSearchProvider(MemFS.scheme, memFS)
+  );
+
+  const encoder = new TextEncoder();
+
+  // Always create memfs:/Welcome directory
+  const welcomeDirectoryUri = vscode.Uri.parse(`${MemFS.scheme}:/Welcome/`);
+  const welcomeREADMEUri = vscode.Uri.parse(
+    `${MemFS.scheme}:/Welcome/README.md`
+  );
+  const workspaceFileUri = vscode.Uri.parse(
+    `${MemFS.scheme}:/web-fs.code-workspace`
+  );
+  try {
+    await memFS.createDirectory(welcomeDirectoryUri);
+  } catch (_) {}
+
+  // Add README.md to /Welcome
+  if (!(await memFS.exists(welcomeREADMEUri))) {
+    await memFS.writeFile(
+      welcomeREADMEUri,
+      encoder.encode(
+        `# Welcome! (Experiment)
+Please open **Command Palette** then run: 
+
+* \`NativeFS: Open Folder\` command to open a local folder on your device.  
+* \`MemFS: Open Folder\` command to create/open a temporary folder in memory. 
+
+Enjoy!`
+      ),
+      {
+        create: true,
+        overwrite: true,
+      }
+    );
+  }
+  // Initialize the workspaceFile
+  if (!(await memFS.exists(workspaceFileUri))) {
+    await memFS.writeFile(
+      workspaceFileUri,
+      encoder.encode(
+        `{
+        "folders": ${JSON.stringify([welcomeDirectoryUri])}
+      }`
+      ),
+      {
+        create: true,
+        overwrite: true,
+      }
+    );
+  }
+
+  // The command has been defined in the package.json file
+  // Now provide the implementation of the command with registerCommand
+  // The commandId parameter must match the command field in package.json
+  context.subscriptions.push(
+    vscode.commands.registerCommand("nativefs.openFolder", async () => {
+      try {
+        const directoryPath:
+          | string
+          | undefined = await vscode.commands.executeCommand(
+          "nativeFS.showDirectoryPicker"
+        );
+        if (!directoryPath) {
+          return vscode.window.showErrorMessage(`Failed to open folder`);
+        }
+        vscode.workspace.updateWorkspaceFolders(
+          vscode.workspace.workspaceFolders
+            ? vscode.workspace.workspaceFolders.length
+            : 0,
+          null,
+          {
+            uri: vscode.Uri.parse(`nativefs:${directoryPath}`),
+            name: path.basename(directoryPath),
+          }
+        );
+      } catch (error) {
+        console.error(error);
+        vscode.window.showErrorMessage(
+          "Your environment doesn't support the Native File System API"
+        );
+      }
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("memfs.openFolder", async (_) => {
+      const name = await vscode.window.showInputBox({
+        value: "Welcome",
+        placeHolder: "Please enter the folder name",
+      });
+      if (!name) {
+        vscode.window.showErrorMessage(`Empty folder name is not supported`);
+      }
+      try {
+        await memFS.createDirectory(
+          vscode.Uri.parse(`${MemFS.scheme}:/${name}`)
+        );
+      } catch (_) {}
+
+      const state = vscode.workspace.updateWorkspaceFolders(0, 0, {
+        uri: vscode.Uri.parse(`${MemFS.scheme}:/${name}`),
+        name: name,
+      });
+    })
+  );
+
+  return {
+    async stat(uri: vscode.Uri): Promise<vscode.FileStat> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.stat(uri);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.stat(uri);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    async readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.readDirectory(uri);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.readDirectory(uri);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    async readFile(uri: vscode.Uri): Promise<Uint8Array> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.readFile(uri);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.readFile(uri);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    async writeFile(
+      uri: vscode.Uri,
+      content: Uint8Array,
+      options: { create: boolean; overwrite: boolean }
+    ): Promise<void> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.writeFile(uri, content, options);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.writeFile(uri, content, options);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    async rename(
+      oldUri: vscode.Uri,
+      newUri: vscode.Uri,
+      options: { overwrite: boolean }
+    ): Promise<void> {
+      if (oldUri.scheme === MemFS.scheme) {
+        return await memFS.rename(oldUri, newUri, options);
+      } else if (oldUri.scheme === NativeFS.scheme) {
+        return await nativeFS.rename(oldUri, newUri, options);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${oldUri.scheme}`);
+      }
+    },
+
+    async delete(
+      uri: vscode.Uri,
+      options: { recursive: boolean }
+    ): Promise<void> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.delete(uri);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.delete(uri, options);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    async createDirectory(uri: vscode.Uri): Promise<void> {
+      if (uri.scheme === MemFS.scheme) {
+        return await memFS.createDirectory(uri);
+      } else if (uri.scheme === NativeFS.scheme) {
+        return await nativeFS.createDirectory(uri);
+      } else {
+        throw new Error(`vscode-web-fs: Invalid scheme ${uri.scheme}`);
+      }
+    },
+
+    nativeFSPrefix: nativeFSPrefix,
+  };
 }
 
-function getWebviewContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
-
-	// const config = JSON.parse(fs.readFileSync(__dirname + '/config.json', 'utf8'));
-	// const branches = config.branches;
-	// const organizations = config.organizations;
-	// const branchOptions = branches.map(branch => `<option value="${branch}">${branch}</option>`).join('');
-	const branchOptions = "dev";
-	const organizationOptions = "virtual-labs";
-	// const organizationOptions = organizations.map(organization => `<option value="${organization}">${organization}</option>`).join('');
-
-
-	return `
-	<!DOCTYPE html>
-		<html lang="en">
-
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Virtual Labs Experiment Authoring Environment</title>
-			<link rel="stylesheet" href="${styleUri}">
-		</head>
-
-		<body>
-			<h1>Virtual Labs Experiment Authoring Environment</h1>
-			<div class="Organization">
-				<label for="organization">Organization</label>
-				<div class="select-container">
-				<input id="organization" name="organization" type="text" value="${organizationOptions}" disabled>
-				</div>
-			</div>
-			<div class="Experiment">
-				<label for="experimentName">Experiment Repository Name</label>
-				<input type="text" id="experimentName" name="experimentName">
-			</div>
-			<div class="Branch">
-				<label for="branch">Branch</label>
-				<div class="select-container">
-				<input id="branch" name="branch" type="text" value="${branchOptions}" disabled>
-				</div>
-			</div>
-			<button id="submit" class="bigButton">Submit</button>
-			
-			<script  src="${scriptUri}"></script>
-		</body>
-
-		</html>`;
-}
-
-function getWebviewFormContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
-
-	return `
-	<!DOCTYPE html>
-		<html lang="en">
-
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Virtual Labs Experiment Authoring Environment</title>
-			<link rel="stylesheet" href="${styleUri}">
-		</head>
-
-		<body>
-			<h1>Virtual Labs Experiment Authoring Environment</h1>
-			<div class="Organization">
-				<label for="userName">Github User Name</label>
-				<input type="text" id="userName" name="userName">
-
-			</div>
-			<div class="Experiment">
-				<label for="personalAccessToken">Personal Access Token</label>
-				<input type="text" id="personalAccessToken" name="personalAccessToken">
-			</div>
-			<div class="Branch">
-				<label for="commitMessage">Commit Message</label>
-				<textarea id="commitMessage" name="commitMessage" ></textarea>
-			</div>
-			<button id="push" class="bigButton">Submit</button>
-
-			<script  src="${scriptUri}"></script>
-		</body>
-
-		</html>`;
-}
-
-function getPRContent(scriptUri: vscode.Uri, styleUri: vscode.Uri) {
-	return `
-	<!DOCTYPE html>
-		<html lang="en">
-
-		<head>
-			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
-			<title>Virtual Labs Experiment Authoring Environment</title>
-			<link rel="stylesheet" href="${styleUri}">
-		</head>
-
-		<body>
-			<h1>Virtual Labs Experiment Authoring Environment</h1>
-			<div class="Organization">
-				<label for="userName">Pull Request Title</label>
-				<input type="text" id="title" name="userName">
-
-			</div>
-			<div class="Experiment">
-				<label for="personalAccessToken">Personal Access Token</label>
-				<input type="text" id="personalAccessToken" name="personalAccessToken">
-			</div>
-			<div class="Branch">
-				<label for="commitMessage">Description</label>
-				<textarea id="description" name="commitMessage" ></textarea>
-			</div>
-			<button id="pr" class="bigButton">Submit</button>
-
-			<script  src="${scriptUri}"></script>
-		</body>
-
-		</html>`;
-}
-
-async function cloneWebView(view: vscode.WebviewView, extensionUri: vscode.Uri) {
-	const panel = vscode.window.createWebviewPanel(
-		'virtualLabs',
-		'Virtual Labs Experiment Authoring Environment',
-		vscode.ViewColumn.One,
-		{
-			enableScripts: true
-		}
-	);
-
-	const scriptUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src', 'webview.js')
-	);
-	const styleUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
-	);
-	panel.webview.html = getWebviewContent(scriptUri, styleUri);
-
-	panel.webview.onDidReceiveMessage(async (message) => {
-		switch (message.command) {
-			case 'clone':
-				{
-						const experimentName = message.experimentName;
-						const branch = message.branch;
-						const organization = message.organization;
-						const repoUrl = `https://vscode.dev/github/${organization}/${experimentName}/tree/${branch}`;
-
-						vscode.env.openExternal(vscode.Uri.parse(repoUrl));
-
-						vscode.window.showInformationMessage('Repository cloned successfully!');
-						panel.dispose();
-						break;
-				}
-			default:
-				break;
-			}
-	});
-}
-
-function buildScript(command: string) {
-	switch (command) {
-		case 'command2':
-			vscode.window.showInformationMessage('Validation UI testing');
-			break;
-		case 'command3':
-			vscode.window.showInformationMessage('Build local UI testing');
-			break;
-		case 'command4':
-			vscode.window.showInformationMessage('Deploy local UI testing');
-			break;
-		case 'command5':
-			vscode.window.showInformationMessage('Clean UI testing');
-			break;
-		default:
-			break;
-	}
-}
-
-async function pushAndMerge(view: vscode.WebviewView, extensionUri: vscode.Uri, context: vscode.ExtensionContext){
-	const panel = vscode.window.createWebviewPanel(
-		'vlabs.buildexp',
-		'User Details',
-		vscode.ViewColumn.One,
-		{
-			enableScripts: true
-		}
-	);
-	const scriptUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src', 'pr.js')
-	);
-	const styleUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
-	);
-
-	panel.webview.html = getWebviewFormContent(scriptUri, styleUri);
-	panel.webview.onDidReceiveMessage(async (message) => {
-		switch (message.command) {
-			case 'push':
-				vscode.window.showInformationMessage('push UI testing');
-				break;
-		}
-	}, undefined, context.subscriptions);
-}
-
-function raisePR(view: vscode.WebviewView, extensionUri: vscode.Uri, context: vscode.ExtensionContext){
-	const panel = vscode.window.createWebviewPanel(
-		'vlabs.buildexp',
-		'User Details',
-		vscode.ViewColumn.One,
-		{
-			enableScripts: true
-		}
-	);
-	const scriptUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src', 'pr.js')
-	);
-	const styleUri = view.webview.asWebviewUri(
-		vscode.Uri.joinPath(extensionUri, 'src',  'webview.css')
-	);
-
-	panel.webview.html = getPRContent(scriptUri, styleUri);
-	panel.webview.onDidReceiveMessage(async (message) => {
-		switch (message.command) {
-			case 'pr':
-				vscode.window.showInformationMessage('Pull request UI testing');
-				break;
-		}
-	}, undefined, context.subscriptions);
-
-}
-
-
-function activate(context: vscode.ExtensionContext){
-	const extensionUri = context.extensionUri;
-	vscode.window.registerWebviewViewProvider(
-		'vlabs.experimentView',
-		{
-			resolveWebviewView: (view) => {
-				view.webview.options = {
-					enableScripts: true,
-				};
-				const scriptUri = view.webview.asWebviewUri(
-					vscode.Uri.joinPath(extensionUri, 'src', 'sidebar.js')
-				);
-				const styleUri = view.webview.asWebviewUri(
-					vscode.Uri.joinPath(extensionUri, 'src', 'sidebar.css')
-				);
-				view.webview.html = getPanel1Content(scriptUri, styleUri);
-				view.webview.onDidReceiveMessage(async (message) => {
-
-				// close webview panel after selection of a command
-					switch (message.command) {
-						case 'command1':
-							if (vscode.workspace.workspaceFolders === null){
-								vscode.window.showErrorMessage("Please open a directory in vscode");
-								break;
-							}
-							cloneWebView(view, extensionUri);
-							break;
-						case 'command6':
-							await pushAndMerge(view, extensionUri, context);
-							break;
-						case 'command7':
-							raisePR(view, extensionUri, context);
-							break;
-						case 'command8':
-							{
-								const path = 	vscode.Uri.joinPath(extensionUri, 'src', 'README.md');
-								vscode.commands.executeCommand('markdown.showPreview', path);
-								break;
-							}
-						default:
-							buildScript(message.command);
-							break;
-					}
-			});
-		}}
-	);
-}
-
-
-
-function deactivate() {}
-
-module.exports = {
-	activate,
-	deactivate,
-};
+// this method is called when your extension is deactivated
+export function deactivate() {}
