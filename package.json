@@ -1,97 +1,301 @@
 {
-	"name": "virtual-labs-experiment-authoring-environment",
-	"displayName": "Virtual Labs Experiment Authoring Environment",
-	"description": "A VS Code extension to handle all the common tasks invovled in virtual labs experiment development.",
-	"version": "0.0.1",
-	"publisher": "Virtual-Labs",
-	"repository": "https://github.com/Dileepadari/virtual_web_trial.git",
-	"engines": {
-		"vscode": "^1.74.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"onCommand:virtual-labs-experiment-authoring-environment.virtualLabs"
-	],
-	"browser": "./dist/web/extension.js",
-	"icon": "images/logo-for-vlabs.png",
-	"contributes": {
-		"viewsContainers": {
-			"activitybar": [
-				{
-					"id": "vlabs-experiment-generator",
-					"title": "Experiment",
-					"icon": "images/icon.svg"
-				}
-			]
-		},
-		"views": {
-			"vlabs-experiment-generator": [
-				{
-					"type": "webview",
-					"id": "vlabs.experimentView",
-					"name": "Authoring Environment"
-				}
-			]
-		},
-		"commands": [
-			{
-				"command": "virtual-labs-experiment-authoring-environment.virtualLabs",
-				"title": "Virtual Labs",
-				"icon": {
-					"light": "images/icon.svg",
-					"dark": "images/icon.svg"
-				}
-			}
-		]
-	},
-	"scripts": {
-		"dev": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=.",
-		"test": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=. --extensionTestsPath=dist/web/test/suite/index.js",
-		"pretest": "npm run compile-web",
-		"vscode:prepublish": "npm run package-web",
-		"compile-web": "webpack",
-		"watch-web": "webpack --watch",
-		"package-web": "webpack --mode production --devtool hidden-source-map",
-		"lint": "eslint src --ext ts"
-	},
-	"devDependencies": {
-		"@types/mocha": "^9.0.0",
-		"@types/tar": "^6.1.11",
-		"@types/vscode": "^1.73.0",
-		"@types/webpack-env": "^1.16.2",
-		"@typescript-eslint/eslint-plugin": "^6.7.0",
-		"@typescript-eslint/parser": "^6.7.0",
-		"@vscode/test-web": "^0.0.22",
-		"assert": "^2.0.0",
-		"eslint": "^8.26.0",
-		"mocha": "^9.2.0",
-		"process": "^0.11.10",
-		"ts-loader": "^9.2.5",
-		"typescript": "^5.3.2",
-		"webpack": "^5.52.1",
-		"webpack-cli": "^4.8.0"
-	},
-	"dependencies": {
-		"axios": "^1.6.7",
-		"child_process": "^1.0.2",
-		"fs": "^0.0.1-security",
-		"jszip": "^3.10.1",
-		"node-fetch": "^3.3.2",
-		"shelljs": "^0.8.5",
-		"simple-git": "^3.22.0",
-		"tar": "^6.2.0",
-		"unzipper": "^0.10.14"
-	},
-	"permissions": [
-		"fs",
-		"webview"
-	],
-	"capabilities": {
-		"untrustedWorkspaces": {
-			"supported": true,
-			"restrictedConfigurations": []
-		}
-	}
+  "name": "vscode-isomorphic-git",
+  "displayName": "vscode-isomorphic-git",
+  "description": "Add the isomorphic-git support to vscode-pwa",
+  "version": "0.0.3",
+  "publisher": "0xgg",
+  "engines": {
+    "vscode": "^1.55.0"
+  },
+  "enableProposedApi": true,
+  "categories": [
+    "SCM Providers"
+  ],
+  "activationEvents": [
+    "workspaceContains:.git",
+    "onCommand:isomorphic-git.init",
+    "onFileSystem:memfs",
+    "onFileSystem:nativefs"
+  ],
+  "main": "./dist/extension.js",
+  "browser": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "isomorphic-git.init",
+        "title": "Initialize Repository",
+        "category": "isomorphic-git",
+        "icon": "$(add)"
+      },
+      {
+        "command": "isomorphic-git.commit",
+        "title": "Commit",
+        "category": "isomorphic-git",
+        "icon": "$(check)"
+      },
+      {
+        "command": "isomorphic-git.refresh",
+        "title": "Refresh Git Status",
+        "category": "isomorphic-git",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "isomorphic-git.stage",
+        "title": "Stage Changes",
+        "category": "isomorphic-git",
+        "icon": "$(plus)"
+      },
+      {
+        "command": "isomorphic-git.stageAll",
+        "title": "Stage All Changes",
+        "category": "isomorphic-git",
+        "icon": "$(add)"
+      },
+      {
+        "command": "isomorphic-git.unstage",
+        "title": "Unstage Changes",
+        "category": "isomorphic-git",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "isomorphic-git.unstageAll",
+        "title": "Unstage All Changes",
+        "category": "isomorphic-git",
+        "icon": "$(remove)"
+      },
+      {
+        "command": "isomorphic-git.clean",
+        "title": "Discard Changes",
+        "category": "isomorphic-git",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "isomorphic-git.cleanAll",
+        "title": "Discard All Changes",
+        "category": "isomorphic-git",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "isomorphic-git.openGitConfig",
+        "title": "Open Git Config",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.addRemote",
+        "title": "Add Remote",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.removeRemote",
+        "title": "Remove Remote",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.checkout",
+        "title": "Checkout",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.deleteBranch",
+        "title": "Delete Branch",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.clone",
+        "title": "Clone",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.pullFrom",
+        "title": "Pull from",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.pushTo",
+        "title": "Push to",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.fetch",
+        "title": "Fetch",
+        "category": "isomorphic-git"
+      },
+      {
+        "command": "isomorphic-git.merge",
+        "title": "Merge Branch",
+        "category": "isomorphic-git"
+      }
+    ],
+    "menus": {
+      "scm/title": [
+        {
+          "command": "isomorphic-git.commit",
+          "group": "navigation",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.refresh",
+          "group": "navigation",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.fetch",
+          "group": "1_header@1",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.pullFrom",
+          "group": "1_header@2",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.pushTo",
+          "group": "1_header@3",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.clone",
+          "group": "1_header@4",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.checkout",
+          "group": "1_header@5",
+          "when": "scmProvider == isomorphic-git"
+        },
+        {
+          "command": "isomorphic-git.merge",
+          "group": "1_header@6",
+          "when": "scmProvider == isomorphic-git"
+        }
+      ],
+      "scm/resourceGroup/context": [
+        {
+          "command": "isomorphic-git.cleanAll",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == workingTree",
+          "group": "inline"
+        },
+        {
+          "command": "isomorphic-git.stageAll",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == workingTree",
+          "group": "inline"
+        },
+        {
+          "command": "isomorphic-git.unstageAll",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == index",
+          "group": "inline"
+        }
+      ],
+      "scm/resourceState/context": [
+        {
+          "command": "isomorphic-git.clean",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == workingTree",
+          "group": "inline"
+        },
+        {
+          "command": "isomorphic-git.stage",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == workingTree",
+          "group": "inline"
+        },
+        {
+          "command": "isomorphic-git.unstage",
+          "when": "scmProvider == isomorphic-git && scmResourceGroup == index",
+          "group": "inline"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "scm",
+        "contents": "The folder currently open doesn't have a git repository. You can initialize a repository which will enable source control features powered by [isomorphic-git](https://github.com/isomorphic-git/isomorphic-git/).  \n[Initialize Repository](command:isomorphic-git.init)  \n[Clone a Repository](command:isomorphic-git.clone)"
+      }
+    ],
+    "configuration": {
+      "title": "isomorphic-git",
+      "properties": {
+        "isomorphic-git.authorName": {
+          "description": "Git author name",
+          "default": "Anonymous",
+          "type": "string"
+        },
+        "isomorphic-git.authorEmail": {
+          "description": "Git author email",
+          "default": "anonymous@git.com",
+          "type": "string"
+        },
+        "isomorphic-git.corsProxy": {
+          "description": "The Git cors proxy. Please [check this](https://github.com/isomorphic-git/isomorphic-git#cors-support) for why do we need cors proxy.",
+          "default": "https://crossnote.app/cors/",
+          "type": "string"
+        },
+        "isomorphic-git.credentials": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "title": "inner objects",
+            "properties": {
+              "url": {
+                "type": "string",
+                "description": "The URL of the remote Git repository. Eg 'https://github.com/0xgg/vscode-isomorphic-git.git'",
+                "default": ""
+              },
+              "username": {
+                "type": "string",
+                "description": "The username",
+                "default": ""
+              },
+              "password": {
+                "type": "string",
+                "description": "The password",
+                "default": ""
+              }
+            }
+          },
+          "default": [],
+          "description": "Git credentials"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "dev": "vscode-test-web --browserType=chromium --extensionDevelopmentPath=.",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "test-compile": "tsc -p ./",
+    "test-watch": "tsc -watch -p ./",
+    "pretest": "yarn run test-compile && yarn run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "postinstall": "patch-package"
+  },
+  "devDependencies": {
+    "@types/es6-promisify": "^6.0.0",
+    "@types/glob": "^7.1.3",
+    "@types/mocha": "^8.0.4",
+    "@types/node": "^12.11.7",
+    "@types/vscode": "^1.55.0",
+    "@typescript-eslint/eslint-plugin": "^4.14.1",
+    "@typescript-eslint/parser": "^4.14.1",
+    "eslint": "^7.19.0",
+    "glob": "^7.1.6",
+    "mocha": "^8.2.1",
+    "patch-package": "^6.4.7",
+    "path-browserify": "^1.0.1",
+    "ts-loader": "^8.0.14",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.6.1",
+    "webpack": "^5.19.0",
+    "webpack-cli": "^4.4.0"
+  },
+  "dependencies": {
+    "@vscode/test-web": "^0.0.51",
+    "buffer": "^6.0.3",
+    "es6-promisify": "^6.1.1",
+    "isomorphic-git": "^1.8.2"
+  },
+  "extensionDependencies": [
+    "0xgg.vscode-web-fs"
+  ]
 }

@@ -1,50 +1,53 @@
-/* eslint-disable no-undef */
 //@ts-check
 
-'use strict';
+"use strict";
 
-const path = require('path');
-//@ts-check
-/** @typedef {import('webpack').Configuration} WebpackConfig **/
+const path = require("path");
+const { ProvidePlugin } = require("webpack");
 
-/** @type WebpackConfig */
-const extensionConfig = {
-	target: 'node', 
-	mode: 'none',
+/**@type {import('webpack').Configuration}*/
+const config = {
+  target: "webworker", // vscode extensions run in a Node.js-context 📖 -> https://webpack.js.org/configuration/node/
+  mode: "none", // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
 
-	entry: './src/extension.ts', 	// entry point of the extension
-	output: {
-		path: path.resolve(__dirname, 'dist/web'),
-		filename: 'extension.js',
-		libraryTarget: 'commonjs2',
-	},
-	externals: {
-		vscode: 'commonjs vscode',
-	},
-	resolve: {
-		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-		fallback:{
-			assert: require.resolve('assert'),
-			childProcess: require.resolve('child_process'),
-		},
-		extensions: ['.ts', '.js'],
-	},
-	module: {
-		rules: [
-			{
-				test: /\.ts$/,
-				exclude: /node_modules/,
-				use: [
-					{
-						loader: 'ts-loader',
-					},
-				],
-			},
-		],
-	},
-	devtool: 'nosources-source-map',
-	infrastructureLogging: {
-		level: 'log', // enables logging required for problem matchers
-	},
+  entry: {
+    extension: "./src/extension.ts",
+  }, // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  output: {
+    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
+    path: path.resolve(__dirname, "dist"),
+    filename: "[name].js",
+    libraryTarget: "umd",
+  },
+  devtool: "nosources-source-map",
+  externals: {
+    vscode: "commonjs vscode", // the vscode-module is created on-the-fly and must be excluded. Add other modules that cannot be webpack'ed, 📖 -> https://webpack.js.org/configuration/externals/
+  },
+  plugins: [
+    new ProvidePlugin({
+      Buffer: ["buffer", "Buffer"],
+    }),
+  ],
+  resolve: {
+    // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
+    extensions: [".ts", ".js"],
+    fallback: {
+      path: require.resolve("path-browserify"),
+      "buffer": require.resolve("buffer/"),
+    },
+  },
+  module: {
+    rules: [
+      {
+        test: /\.(ts|js)$/,
+        exclude: /node_modules/,
+        use: [
+          {
+            loader: "ts-loader",
+          },
+        ],
+      },
+    ],
+  },
 };
-module.exports = [extensionConfig];
+module.exports = config;
