@@ -1,50 +1,70 @@
-/* eslint-disable no-undef */
-//@ts-check
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
+//@ts-check
 'use strict';
 
-const path = require('path');
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
-/** @type WebpackConfig */
-const extensionConfig = {
-	target: 'node', 
-	mode: 'none',
+const path = require('path');
+const webpack = require('webpack');
 
-	entry: './src/extension.ts', 	// entry point of the extension
-	output: {
-		path: path.resolve(__dirname, 'dist/web'),
-		filename: 'extension.js',
-		libraryTarget: 'commonjs2',
+/** @type WebpackConfig */
+const webExtensionConfig = {
+	mode: 'none', // this leaves the source code as close as possible to the original (when packaging we set this to 'production')
+	target: 'webworker', // extensions run in a webworker context
+	entry: {
+		'extension': './src/web/extension.ts',
 	},
-	externals: {
-		vscode: 'commonjs vscode',
+	output: {
+		filename: '[name].js',
+		path: path.join(__dirname, './dist/web'),
+		libraryTarget: 'commonjs',
+		devtoolModuleFilenameTemplate: '../../[resource-path]'
 	},
 	resolve: {
-		// support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-		fallback:{
-			assert: require.resolve('assert'),
-			childProcess: require.resolve('child_process'),
+		mainFields: ['browser', 'module', 'main'], // look for `browser` entry point in imported node modules
+		extensions: ['.ts', '.js'], // support ts-files and js-files
+		alias: {
+			// provides alternate implementation for node module and source files
 		},
-		extensions: ['.ts', '.js'],
+		fallback: {
+			// Webpack 5 no longer polyfills Node.js core modules automatically.
+			// see https://webpack.js.org/configuration/resolve/#resolvefallback
+			// for the list of Node.js core module polyfills.
+			'assert': require.resolve('assert')
+		}
 	},
 	module: {
-		rules: [
-			{
-				test: /\.ts$/,
-				exclude: /node_modules/,
-				use: [
-					{
-						loader: 'ts-loader',
-					},
-				],
-			},
-		],
+		rules: [{
+			test: /\.ts$/,
+			exclude: /node_modules/,
+			use: [{
+				loader: 'ts-loader'
+			}]
+		}]
 	},
-	devtool: 'nosources-source-map',
+	plugins: [
+		new webpack.optimize.LimitChunkCountPlugin({
+			maxChunks: 1 // disable chunks by default since web extensions must be a single bundle
+		}),
+		new webpack.ProvidePlugin({
+			process: 'process/browser', // provide a shim for the global `process` variable
+		}),
+	],
+	externals: {
+		'vscode': 'commonjs vscode', // ignored because it doesn't exist
+	},
+	performance: {
+		hints: false
+	},
+	devtool: 'nosources-source-map', // create a source map that points to the original source file
 	infrastructureLogging: {
-		level: 'log', // enables logging required for problem matchers
+		level: "log", // enables logging required for problem matchers
 	},
 };
-module.exports = [extensionConfig];
+
+module.exports = [ webExtensionConfig ];

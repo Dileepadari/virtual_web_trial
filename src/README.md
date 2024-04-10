@@ -1,46 +1,99 @@
-# This is test README file for the web version of virtual lab extension
+# Virtual Labs Experiment Authoring Extension- Help
+
+## Introduction
+The Virtual Labs extension is developed for authoring Virtual Labs experiments in a strealined manner. This lightweight extension operates fully within the browser, facilitating experiment development without the need for additional downloads.
+
+## Prerequisities
+To make use of the extension, the following is required:
+
+- Github account 
+- Stable internet connection
+
+## Getting started- setup
+1. Install the extension on vscode.dev from the Visual Studio Code Marketplace by searching for "Virtual Labs Experiment Authoring Environment".
+
+2. Click on the extension icon in the left panel
+
+3. You will see the following list of options. 
+    - Initialise Experiment
+    - Validate
+    - View current Experiment
+    - Save progress
+    - Submit for Review
+    - Help
+
+Note: For these options, you may be asked to log in to GitHub if not already done so. 
+
+## Log in 
+You may either be asked via a pop-up window or you can see a blue notification appear on the accounts logo on the left hand panel.
 
 
-# Virtual lab extension Sample
+### Incase of popup
 
-This is a test repo for the web version of virtual lab extension
+1. Click Allow
 
-Guide for this sample: https://code.visualstudio.com/api/extension-guides/web-extensions.
+     This may redirect you to another tab or open a window for you to sign in.
+2.  You must input the credentials accordingly 
 
+### Incase of notification 
 
-## VS Code API
+1. Click on the Accounts logo
+2. Click on the 'Sign in to ... '
 
-### `vscode` module
-
-- [`commands.registerCommand`](https://code.visualstudio.com/api/references/vscode-api#commands.registerCommand)
-- [`window.showInformationMessage`](https://code.visualstudio.com/api/references/vscode-api#window.showInformationMessage)
-
-### Contribution Points
-
-- [`browser`](https://code.visualstudio.com/api/references/extension-manifest)
-
-- [`contributes.commands`](https://code.visualstudio.com/api/references/contribution-points#contributes.commands)
-
-## Running the Sample
-
-- Run `npm install` in terminal to install dependencies		
-- Run `npm run dev` to run development mode		
+    This may redirect you to another tab or open a window for you to sign in.
+3.  You must input the credentials accordingly 
 
 
-# why vscode web and codespaces?
-Codespaces
 
-    Cloud-based development environment: Codespaces is a cloud-based development environment that allows you to code from anywhere, on any device. It's hosted on Microsoft's servers, so you don't need to worry about setting up and maintaining your own development environment.
-    Pre-configured with popular tools and languages: Codespaces comes pre-configured with a variety of popular tools and languages, so you can get started coding right away. This includes support for JavaScript, Python, Java, C++, and more.
-    Integrated with GitHub: Codespaces is integrated with GitHub, so you can easily create a new Codespace from a GitHub repository, and your changes will be automatically saved back to GitHub.
-    Collaboration features: Codespaces includes a number of collaboration features, such as real-time editing and commenting, so you can work on projects with others in real time.
+## Experiment Authoring
 
-VSCode Web
+### Option 1: Initialise Experiment
 
-    Web-based version of VSCode: VSCode Web is a web-based version of VSCode that you can use in your browser. It provides a similar experience to the desktop version of VSCode, but it doesn't require you to install anything on your computer.
-    Limited functionality: VSCode Web has some limitations compared to the desktop version of VSCode. For example, it doesn't support all of the same extensions, and it doesn't have the same level of performance.
-    Best for quick edits and small projects: VSCode Web is best suited for quick edits and small projects. If you're working on a larger project, or if you need to use more advanced features, you're better off using the desktop version of VSCode.
+#### [Must be done first]
 
-Which one should you use?
+By clicking on this you will be prompted to enter the Experiment Repository Name that you wish to initialize. Clicking on Submit will open that experiment on the dev branch. Do not atttempt to change this 
 
-The best choice for you depends on your needs. If you need a cloud-based development environment with all the bells and whistles, Codespaces is the way to go. If you're just looking for a quick and easy way to edit some code, VSCode Web is a good option.
+This step ususally requies a login.
+
+For more details, view the Login section
+
+### Option 2: Validate
+
+This validates the code with eslint and also validates the experiment descriptor based on a schema.
+
+### Option 3: View Experiment
+
+Provides a link to view the experiment, including any changes you have made to the codebase. 
+
+This effectively automates the process of building the experiment and delpoys it directly on Github Pages, accessible via a link. 
+
+By using this link in a browser tab, can view experiment online. 
+
+### Option 4: Save progress
+
+Saves ur progress on dev branch. This is so that any changes made to the experiment is stored persistently across all browser environements and sessions.
+
+### Option 5: Deploy for testing
+
+#### [Note: requires write permission access of your account to that repository]
+
+Pushes the experiment to testing branch of the experiment repository and deploys the experiment on the github pages of Virtual Labs.
+- Github User Name - Here you have to enter your github username.
+- Personal Access Token - Here you have to enter your personal access token. You can generate a personal access token by following the steps given here.
+- Commit Message - Here you can enter a short message describing the summary of the work you have done.
+
+
+### Option 6- Submit for Review 
+Raises a pull request to the main branch of the experiment repository.
+- Pull Request title - Here you have to enter the title of your pull request.
+- Personal Access Token - Here you have to enter your personal access token. You can generate a personal access token by following the steps given here.
+- Description - Here you can enter a short message describing the summary of the pull request you have created.
+
+### Option 7 - Help
+Explains how to to operate and use the extension. 
+
+## Developer Support
+If you face any difficulty in using this extension or find any bug then you can perform the following steps
+1. Take a screenshot of the bug you encountered or the problem you got.
+2. Explain in brief the steps you performed before encountering the bug/problem and attach a screenshot of the same.
+3. Email us at dev-support@vlabs.ac.in.
