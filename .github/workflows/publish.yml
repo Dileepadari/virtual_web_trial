@@ -6,6 +6,8 @@ on:
       - published
       - edited
 
+permissions: write-all
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
