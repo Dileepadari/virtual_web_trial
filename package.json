@@ -1,16 +1,16 @@
 {
   "name": "VirtualLabs",
   "displayName": "VirtualLabs",
-  "description": "A web extension for Virtual Labs",
+  "description": "A web extension for Virtual Labs Experiment Authoring. Beta version.",
   "author": {
     "name": "Virtual-Labs"
   },
-  "version": "0.0.1",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.86.0"
   },
   "publisher": "Virtual-Labs",
-  "repository": "https://github.com/virtual-labs/tool-web-ext-vscode",
+  "repository": "https://github.com/virtual-labs/tool-web-ext-vscode/",
   "categories": [
     "Other"
   ],
@@ -71,7 +71,8 @@
     "compile-web": "webpack",
     "watch-web": "webpack --watch",
     "package-web": "webpack --mode production --devtool hidden-source-map",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "publish": "vsce package --baseImagesUrl https://github.com/virtual-labs/tool-web-ext-vscode/raw/dev"
   },
   "devDependencies": {
     "@types/assert": "^1.5.10",
@@ -81,6 +82,7 @@
     "@typescript-eslint/eslint-plugin": "^6.19.1",
     "@typescript-eslint/parser": "^6.19.1",
     "@vscode/test-web": "^0.0.51",
+    "@vscode/vsce": "^2.25.0",
     "assert": "^2.1.0",
     "eslint": "^8.57.0",
     "mocha": "^10.3.0",
@@ -93,6 +95,9 @@
   "dependencies": {
     "axios": "^1.6.8",
     "http-status-codes": "^2.3.0",
-    "octokit": "^3.1.2"
-  }
+    "octokit": "^3.2.0"
+  },
+  "extensionDependencies": [
+    "ms-vscode.remote-repositories"
+  ]
 }

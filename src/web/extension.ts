@@ -214,8 +214,8 @@ function getPanel1Content() {
 				@keyframes spin {
 				0% { transform: rotate(0deg); }
 				100% { transform: rotate(360deg); }
-			  }
-			  
+			}
+
 			</style>
 			</head>
 		<body>
@@ -251,10 +251,15 @@ function getPanel1Content() {
 			const command6 = document.getElementById('command6');
 
 		command1.addEventListener('click', () => {
-				vscode.postMessage({
-					command: 'command1'
-				});
+			vscode.postMessage({
+				command: 'command1'
 			});
+		});
+		command2.addEventListener('click', () => {
+			vscode.postMessage({
+				command: 'command2'
+			});
+		});
 		command3.addEventListener('click', async () => {
 			await vscode.postMessage({
 				command: 'command3'
@@ -263,11 +268,6 @@ function getPanel1Content() {
 			setTimeout(function() {
 				command3.disabled = false;
 			}, 20000);
-		});
-		command2.addEventListener('click', () => {
-			vscode.postMessage({
-				command: 'command2'
-			});
 		});
 		command4.addEventListener('click', () => {
 			vscode.postMessage({
@@ -362,6 +362,7 @@ function getWebviewContent(context: vscode.ExtensionContext) {	// const config =
 		</html>`;
 }
 
+//Display for Save progress instructions
 function getPushInstructions() {
 	return `
 	<!DOCTYPE html>
@@ -380,21 +381,28 @@ function getPushInstructions() {
 		<body>
 			<h1>Instructions</h1>
 			<div class="push-dev_container">
-				<!-- <img src="image1.png" alt="Image 1"> -->
-				<h4> A panel should appear on the left-hand side similar to this one with the <span class="blue-background">   Commit & Push  </span>   button and a text box above this button.</h4>
-				<h4> It shows all the changes (additions, modifications, deletions) made to the files done by you.</h4> 
+				<h4> A panel should appear on the left-hand side with the <span class="blue-background">   Commit & Push  </span>   button and a text box above this button.</h4>
+				<h4> The panel shows all the changes (additions, modifications, deletions) made to the files done by you.</h4> 
 			</div>
 
 			<br>
 			<br>
 
 			<div class="push-dev_container">
-				<!-- <img src="image2.png" alt="Image 2"> -->
-				<h4> Add your commit message in the text box as shown. </h4>
-				<h4> Press push and commit.</h4>
+				<h4> Add your commit message in the text box. </h4>
+				<h4> Press the button Commit & Push.</h4>
 			</div>
 
-			<h3> <div class="instructions" style="color: red;">Warning: Please ensure you have write permissions to the repository or contact the owner or team at virtual labs via their email virtuallabs@gmail.com</div> </h3>
+			<br>
+			<br>
+
+			<div class="push-dev_container">
+				<h4> If the changes have been pushed, or there are no changes made, the Commit & Push button appears faded </h4>
+				<h4> Additionally, the panel will be blank with no changes. </h4>
+				<h4> You can close the Save progress tab </h4>
+			</div>
+
+			<h3> <div class="instructions" style="color: red;">Warning: Please ensure you have write permissions to the repository or contact the owner or team at virtual labs via their email dev-support@vlabs.ac.in.</div> </h3>
 		</body>
 		</html>`;
 }
@@ -447,7 +455,8 @@ function getPullInstructions() {
 }
 
 let repositoryName: string | undefined = "";
-let pat = "";
+let pat : string | undefined = "";
+
 // Register command to initialize experiment
 vscode.commands.registerCommand('extension.initializeExperiment', async (context: vscode.ExtensionContext) => {
 	const panel = vscode.window.createWebviewPanel(
@@ -464,19 +473,23 @@ vscode.commands.registerCommand('extension.initializeExperiment', async (context
 		switch (message.command) {
 			case 'clone':
 				{
+					// organization name
+					const organization = message.organization;
+					// experiment name
 					const experimentName = message.experimentName;
-					const branch = message.branch;
-					const organization = "virtual-labs";
-					const repoUrl = `https://github.com/${organization}/${experimentName}/tree/${branch}`;
-
 					repositoryName = experimentName;
 					context.globalState.update('reponame', repositoryName);
+					// branch name
+					const branch = message.branch;
+					// access token for GitHub API
 					context.globalState.update('accesstoken', message.token);
 					pat = message.token;
 
+					const repoUrl = `https://github.com/${organization}/${experimentName}/tree/${branch}`;
+
 					// open remote repository from github using Remote repository vscode api extension
 					await vscode.commands.executeCommand('remoteHub.openRepository', repoUrl);
-					vscode.window.showInformationMessage('Experiment initializing successfully');
+					vscode.window.showInformationMessage('Experiment initialization started');
 					panel.dispose();
 					break;
 				}
@@ -507,66 +520,85 @@ vscode.commands.registerCommand('extension.validate', async (context: vscode.Ext
 	// run the validation script
 	const actoken = context.globalState.get('accesstoken');
 	pat = actoken as string; // access token is stored in global state when user
-	vscode.window.showInformationMessage('Validation started successfully');
 	repositoryName = context.globalState.get('reponame');
 	const repos: string = repositoryName as string;
 	const workspaceFolders = vscode.workspace.workspaceFolders;
 	const octokit = new Octokit({
 		auth: pat,
 	});
-
-	await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
-		owner: "virtual-labs",
-		repo: repos,
-		workflow_id: 'validate.yml',
-		ref: 'dev'
-	}).then((response) => {
-		if (response.status === 204) {
-			vscode.window.showInformationMessage('Validation started successfully');
-			const running_status = setInterval(async () => {
-				if (workspaceFolders && workspaceFolders.length > 0) {
-					await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
-						owner: 'virtual-labs',
-						repo: repos,
-						// repo: 'exp-dummy-experiment1-iiith',
-						workflow_id: 'validate.yml',
-						headers: {
-							'X-GitHub-Api-Version': '2022-11-28'
-						}
-					}).then(async (response) => {
-						const runstatus = response.data.workflow_runs[0].status;
-						if (runstatus === 'completed') {
-							vscode.window.showInformationMessage('Validation completed successfully');
-							await vscode.commands.executeCommand('remoteHub.pull');
-							vscode.window.showInformationMessage('Select lint.txt from the list to see validation results.');
-							// vscode.window.showTextDocument(vscode.Uri.file(`${workspaceFolders[0].uri.path}/lint.txt`));
-							await vscode.commands.executeCommand('workbench.action.files.openFile', vscode.Uri.file(`${workspaceFolders[0].uri.path}/lint.txt`));
-							clearInterval(running_status);
-						}
-						else if (runstatus === 'Failed') {
-							vscode.window.showErrorMessage('Validation failed');
-							clearInterval(running_status);
-						}
-						else {
-							vscode.window.showInformationMessage('Validation in progress');
-						}
-					});
-				} else {
-					vscode.window.showErrorMessage("No workspace folder found.");
-				}
-			}, 10000);
-		}
-		else {
-			vscode.window.showErrorMessage('Validation failed');
-		}
-	}).catch(() => {
-		vscode.window.showErrorMessage('Validation failed');
-	});
+	if (workspaceFolders && workspaceFolders.length > 0) {
+		await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+			owner: "virtual-labs",
+			repo: repos,
+			workflow_id: 'validate.yml',
+			ref: 'dev'
+		}).then((response) => {
+			if (response.status === 204) {
+				vscode.window.showInformationMessage('Validation started successfully');
+				const running_status = setInterval(async () => {
+					if (workspaceFolders && workspaceFolders.length > 0) {
+						await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
+							owner: 'virtual-labs',
+							repo: repos,
+							// repo: 'exp-dummy-experiment1-iiith',
+							workflow_id: 'validate.yml',
+							headers: {
+								'X-GitHub-Api-Version': '2022-11-28'
+							}
+						}).then(async (response) => {
+							if(response.status === 200 || response.status === 201){
+								const runstatus = response.data.workflow_runs[0].status;
+								if (runstatus === 'completed') {
+									vscode.window.showInformationMessage('Validation completed successfully');
+									await vscode.commands.executeCommand('remoteHub.pull');
+									vscode.window.showInformationMessage('Select lint.txt from the list to see validation results.');
+									// vscode.window.showTextDocument(vscode.Uri.file(`${workspaceFolders[0].uri.path}/lint.txt`));
+									await vscode.commands.executeCommand('workbench.action.files.openFile', vscode.Uri.file(`${workspaceFolders[0].uri.path}/lint.txt`));
+									clearInterval(running_status);
+								}
+								else if (runstatus === 'Failed') {
+									vscode.window.showErrorMessage('Validation failed');
+									clearInterval(running_status);
+								}
+								else {
+									vscode.window.showInformationMessage('Validation in progress');
+								}
+							}
+							else if(response.status === 403) {
+								vscode.window.showErrorMessage('Validation failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+								clearInterval(running_status);
+							}
+							else if(response.status === 404) {
+								vscode.window.showErrorMessage('Validation failed due to invalid repository. It is wrongly configured');
+								clearInterval(running_status);
+							}
+						});
+					} else {
+						vscode.window.showErrorMessage("No workspace folder found.");
+					}
+				}, 10000);
+			}
+			else if(response.status === 403) {
+				vscode.window.showErrorMessage('Validation failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+			}
+			else if(response.status === 404) {
+				vscode.window.showErrorMessage('Validation failed due to invalid repository. It is wrongly configured');
+			}
+			else {
+				vscode.window.showErrorMessage('Validation failed');
+			}
+		}).catch(error => {
+			vscode.window.showErrorMessage('Validation failed:', error.message);
+		});
+	}
+	else {
+		vscode.window.showErrorMessage("No workspace folder found.");
+	}
 });
 
 // Register command to view current experiment
-const MergeAndExec = async (context: vscode.ExtensionContext) => {
-
+// const MergeAndExec = async (context: vscode.ExtensionContext) => {
+vscode.commands.registerCommand('extension.MergeAndExec', async (context: vscode.ExtensionContext) => {
 	pat = context.globalState.get('accesstoken') as string;
 	repositoryName = context.globalState.get('reponame');
 	const repos: string = repositoryName as string;
@@ -582,52 +614,80 @@ const MergeAndExec = async (context: vscode.ExtensionContext) => {
 		base: 'testing',
 		head: 'dev',
 		commit_message: 'Merge dev and testing branches'
-	});
-
-	await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
-		owner: "virtual-labs",
-		repo: repos,
-		workflow_id: 'deployment-script.yml',
-		ref: 'testing'
-	}).then((response) => {
-		if (response.status === 204) {
-			vscode.window.showInformationMessage('Build started successfully');
-			const running_status = setInterval(async () => {
-				if (workspaceFolders && workspaceFolders.length > 0) {
-					await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
-						owner: 'virtual-labs',
-						repo: repos,
-						workflow_id: 'deployment-script.yml',
-						headers: {
-							'X-GitHub-Api-Version': '2022-11-28'
+	}).then(async (response) => {
+		if (response.status === 201) {
+			vscode.window.showInformationMessage('Merge completed successfully');
+			await octokit.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+				owner: "virtual-labs",
+				repo: repos,
+				workflow_id: 'deployment-script.yml',
+				ref: 'testing'
+			}).then((response) => {
+				if (response.status === 204) {
+					vscode.window.showInformationMessage('Build started successfully');
+					const running_status = setInterval(async () => {
+						if (workspaceFolders && workspaceFolders.length > 0) {
+							await octokit.request('GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs', {
+								owner: 'virtual-labs',
+								repo: repos,
+								workflow_id: 'deployment-script.yml',
+								headers: {
+									'X-GitHub-Api-Version': '2022-11-28'
+								}
+							}).then(async (response) => {
+								if(response.status === 200 || response.status === 201){
+									const runstatus = response.data.workflow_runs[0].status;
+									if (runstatus === 'completed') {
+										vscode.window.showInformationMessage('build completed successfully');
+										vscode.env.openExternal(vscode.Uri.parse(`https://virtual-labs.github.io/${repos}`));
+										clearInterval(running_status);
+									}
+									else if (runstatus === 'Failed') {
+										vscode.window.showErrorMessage('build failed');
+										clearInterval(running_status);
+									}
+									else {
+										vscode.window.showInformationMessage('Build in progress');
+									}
+								}
+								else if(response.status === 403) {
+									vscode.window.showErrorMessage('build failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+									clearInterval(running_status);
+								}
+								else if(response.status === 404) {
+									vscode.window.showErrorMessage('build failed due to invalid repository. It is wrongly configured');
+									clearInterval(running_status);
+								}
+							});
+						} else {
+							vscode.window.showErrorMessage("No workspace folder found.");
 						}
-					}).then(async (response) => {
-						const runstatus = response.data.workflow_runs[0].status;
-						if (runstatus === 'completed') {
-							vscode.window.showInformationMessage('build completed successfully');
-							vscode.env.openExternal(vscode.Uri.parse(`https://virtual-labs.github.io/${repos}`));
-							clearInterval(running_status);
-						}
-						else if (runstatus === 'Failed') {
-							vscode.window.showErrorMessage('build failed');
-							clearInterval(running_status);
-						}
-						else {
-							vscode.window.showInformationMessage('Build in progress');
-						}
-					});
-				} else {
-					vscode.window.showErrorMessage("No workspace folder found.");
+					}, 10000);
 				}
-			}, 10000);
+				else if(response.status === 403) {
+					vscode.window.showErrorMessage('build failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+				}
+				else if(response.status === 404) {
+					vscode.window.showErrorMessage('build failed due to invalid repository. It is wrongly configured');
+				}
+				else {
+					vscode.window.showErrorMessage('build failed');
+				}
+			}).catch(error => {
+				vscode.window.showErrorMessage('build failed: ', error.message);
+			});
+		}
+		else if(response.status === 403) {
+			vscode.window.showErrorMessage('Merge failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+		}
+		else if(response.status === 404) {
+			vscode.window.showErrorMessage('Merge failed due to invalid repository. It is wrongly configured');
 		}
 		else {
-			vscode.window.showErrorMessage('build failed');
+			vscode.window.showErrorMessage('Merge failed');
 		}
-	}).catch(() => {
-		vscode.window.showErrorMessage('build failed');
 	});
-};
+});
 
 // Register command to submit for review
 vscode.commands.registerCommand('extension.submitForReview', async (context: vscode.ExtensionContext) => {
@@ -657,6 +717,7 @@ vscode.commands.registerCommand('extension.submitForReview', async (context: vsc
 					});
 					repositoryName = context.globalState.get('reponame') as string;
 					const repos: string = repositoryName;
+					vscode.window.showInformationMessage('Pull request Initiated');
 					await octokit.request('POST /repos/{owner}/{repo}/pulls', {
 						owner: 'virtual-labs',
 						repo: repos,
@@ -671,9 +732,20 @@ vscode.commands.registerCommand('extension.submitForReview', async (context: vsc
 						if(response.status === 201){
 							vscode.window.showInformationMessage('Pull request submitted successfully');
 						}
+						else if(response.status === 422){
+							vscode.window.showErrorMessage('Pull request already exists');
+						}
+						else if(response.status === 403){
+							vscode.window.showErrorMessage('Pull request failed due to exceeded rate limit. Please try changing your internet or come again after some time.');
+						}
+						else if(response.status === 404){
+							vscode.window.showErrorMessage('Pull request failed due to invalid repository.');
+						}
 						else{
 							vscode.window.showErrorMessage("Failed to raise Pull request");
 						}
+					}).catch(error => {
+						vscode.window.showErrorMessage('Sending pull request failed: ' + error.message);
 					});
 					panel.dispose();
 					break;
@@ -686,7 +758,7 @@ vscode.commands.registerCommand('extension.submitForReview', async (context: vsc
 
 // Register command for help
 vscode.commands.registerCommand('extension.help', async (extensionUri: vscode.Uri) => {
-	const path = vscode.Uri.joinPath(extensionUri, 'src', 'README.md');
+	const path = vscode.Uri.joinPath(extensionUri, 'README.md');
 	vscode.commands.executeCommand('markdown.showPreview', path);
 });
 
@@ -715,8 +787,8 @@ function activate(context: vscode.ExtensionContext) {
 							vscode.commands.executeCommand('extension.validate', context);
 							break;
 						case 'command4': // View Current Experiment
-							MergeAndExec(context);
-							break;
+							vscode.commands.executeCommand('extension.MergeAndExec', context);
+						break;
 						case 'command5': // Submit for Review
 							vscode.commands.executeCommand('extension.submitForReview', context);
 							break;
