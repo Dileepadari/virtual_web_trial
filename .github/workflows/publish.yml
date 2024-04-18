@@ -22,6 +22,7 @@ jobs:
       - name: Publish to Visual Studio Marketplace
         uses: HaaLeo/publish-vscode-extension@v1
         with:
+          baseImagesUrl: https://raw.githubusercontent.com/virtual-labs/tool-web-ext-vscode/dev
+          baseContentUrl: https://raw.githubusercontent.com/virtual-labs/tool-web-ext-vscode/dev
           pat: ${{ secrets.VS_MARKETPLACE_TOKEN }}
           registryUrl: https://marketplace.visualstudio.com
-          baseImagesUrl: https://raw.githubusercontent.com/virtual-labs/tool-web-ext-vscode/dev
