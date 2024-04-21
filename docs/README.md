@@ -24,12 +24,5 @@ The key features of Virtual Labs Content Development Platform include:
 
 | DOCUMENT                                      | DESCRIPTION                                                                                       |
 | --------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| [User document](./docs/USER_README.md)          | A comprehensive documentation for users of Virtual Labs Online Experiment Authoring Environment                                       |
-| [Developer document](./docs/DEVELOPER_README.md) | A comprehensive development documentation for developers working on the Virtual Labs Online Experiment Authoring Environment. |
-
-
-## Developer Support
-If you face any difficulty in using this extension or find any bug then you can perform the following steps
-1. Take a screenshot of the bug you encountered or the problem you got.
-2. Explain in brief the steps you performed before encountering the bug/problem and attach a screenshot of the same.
-3. Email us at dev-support@vlabs.ac.in.
+| [User document](./USER_README.md)          | A comprehensive documentation for users of Virtual Labs Online Experiment Authoring Environment                                       |
+| [Developer document](./DEVELOPER_README.md) | A comprehensive development documentation for developers working on the Virtual Labs Online Experiment Authoring Environment. | 
